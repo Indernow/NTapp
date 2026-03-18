@@ -29,15 +29,29 @@ app.use("/api", require("./routes/paymentRoutes"));
 
 const frontendBuildDir = path.resolve(__dirname, "frontend", "build");
 const frontendIndexFile = path.join(frontendBuildDir, "index.html");
+const hasFrontendBuild = fs.existsSync(frontendIndexFile);
 
-if (fs.existsSync(frontendIndexFile)) {
+if (hasFrontendBuild) {
   app.use(express.static(frontendBuildDir));
-  app.get("*", (req, res) => {
-    res.sendFile(frontendIndexFile);
-  });
-} else {
-  console.warn(`Frontend build not found at ${frontendIndexFile}. Serving API routes only.`);
 }
+
+app.get("*", (req, res) => {
+  if (!hasFrontendBuild) {
+    return res.status(404).json({
+      error: "Frontend build not found",
+      expectedPath: frontendIndexFile
+    });
+  }
+
+  res.sendFile(frontendIndexFile, (err) => {
+    if (!err) return;
+    console.error(`Failed to serve frontend index file: ${err.message}`);
+    return res.status(404).json({
+      error: "Frontend index file missing at runtime",
+      expectedPath: frontendIndexFile
+    });
+  });
+});
 
 app.listen(port, () => {
     console.log(`App is listening at ${port}`);
