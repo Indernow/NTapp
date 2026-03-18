@@ -26,10 +26,10 @@ app.use("/api/addon", require("./routes/addon"));
 
 app.use("/api", require("./routes/paymentRoutes"));
 
-app.use(express.static("./frontend/build"));
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"))
-});
+// app.use(express.static("./frontend/build"));
+// app.get("*", (req, res) => {
+//   res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"))
+// });
 
 app.listen(port, () => {
     console.log(`App is listening at ${port}`);
