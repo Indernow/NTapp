@@ -2,6 +2,7 @@ const express = require('express');
 const Razorpay = require('razorpay');
 const connectToMongo = require('./db');
 const cors = require('cors');
+const fs = require('fs');
 const app = express();
 const path = require("path");
 // Enable CORS for all routes
@@ -26,10 +27,17 @@ app.use("/api/addon", require("./routes/addon"));
 
 app.use("/api", require("./routes/paymentRoutes"));
 
-// app.use(express.static("./frontend/build"));
-// app.get("*", (req, res) => {
-//   res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"))
-// });
+const frontendBuildDir = path.resolve(__dirname, "frontend", "build");
+const frontendIndexFile = path.join(frontendBuildDir, "index.html");
+
+if (fs.existsSync(frontendIndexFile)) {
+  app.use(express.static(frontendBuildDir));
+  app.get("*", (req, res) => {
+    res.sendFile(frontendIndexFile);
+  });
+} else {
+  console.warn(`Frontend build not found at ${frontendIndexFile}. Serving API routes only.`);
+}
 
 app.listen(port, () => {
     console.log(`App is listening at ${port}`);
